@@ -1,0 +1,8 @@
+node_modules
+dist
+build
+.env
+pnpm-lock.yaml
+.cache
+pnpm-workspace.yaml
+public/mockServiceWorker.js
