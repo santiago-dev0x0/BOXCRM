@@ -9,7 +9,7 @@ import happyHuman from '@/assets/register-image.svg';
 
 const registerSchema = z
   .object({
-    name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
+    name: z.string().min(2, 'El nombre debe tener al menos 2 caßracteres'),
     email: z.string().email('Email inválido'),
     password: z
       .string()
@@ -39,45 +39,37 @@ export function RegisterPage() {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      {/* Fondo con gradiente vertical inspirado en la imagen */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background: `
-            linear-gradient(45deg, 
-              #87CEEB 0%, 
-              #B19CD9 15%, 
-              #DDA0DD 30%, 
-              #FF69B4 45%, 
-              #DA70D6 60%, 
-              #9370DB 75%, 
-              #00CED1 100%
-            )
-          `,
-          backgroundSize: '100% 100%',
-        }}
-      >
-        {/* Textura granular */}
+      <div className="absolute inset-0 bg-[#1a103c]">
+        {/* 1. Capas de Color (Radial Gradients Superpuestos) */}
         <div
-          className="absolute inset-0 opacity-30"
+          className="absolute inset-0"
           style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-            backgroundSize: '200px 200px',
+            backgroundImage: `
+          radial-gradient(at 12% 15%, hsla(215, 90%, 75%, 1) 0px, transparent 50%),
+          radial-gradient(at 25% 50%, hsla(300, 85%, 65%, 1) 0px, transparent 50%),
+          radial-gradient(at 80% 90%, hsla(190, 80%, 60%, 1) 0px, transparent 50%),
+          radial-gradient(at 80% 10%, hsla(260, 60%, 50%, 1) 0px, transparent 50%),
+          radial-gradient(at 0% 100%, hsla(265, 80%, 40%, 1) 0px, transparent 50%)
+        `,
           }}
         />
-        {/* Ondas suaves para crear efecto de movimiento */}
+
+        {/* 2. Capa de Textura/Ruido */}
         <div
-          className="absolute inset-0 opacity-20"
-          style={{
-            background: `
-              radial-gradient(ellipse 80% 50% at 50% 20%, rgba(255, 105, 180, 0.4) 0%, transparent 50%),
-              radial-gradient(ellipse 60% 40% at 80% 60%, rgba(138, 43, 226, 0.3) 0%, transparent 50%),
-              radial-gradient(ellipse 70% 50% at 20% 80%, rgba(0, 206, 209, 0.3) 0%, transparent 50%)
-            `,
-          }}
+          className="pointer-events-none absolute inset-0 opacity-60 mix-blend-overlay"
+          style={{ filter: 'url(#noiseFilter)' }}
         />
       </div>
-
+      <svg className="invisible absolute size-0">
+        <filter id="noiseFilter">
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency="0.8"
+            numOctaves="3"
+            stitchTiles="stitch"
+          />
+        </filter>
+      </svg>
       {/* Contenedor principal */}
       <div className="relative z-10 flex min-h-screen items-center justify-center p-4 lg:justify-start lg:px-8 lg:py-12">
         {/* Tarjeta blanca con formulario */}
