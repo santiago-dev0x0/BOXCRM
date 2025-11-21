@@ -1,3 +1,5 @@
+'use client';
+
 import { useForm, Controller } from 'react-hook-form';
 import type { SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -5,27 +7,16 @@ import { z } from 'zod';
 import { Link } from 'react-router';
 import { MessageSquareDot, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-// import {
-//   Form,
-//   FormControl,
-//   FormField,
-//   FormItem,
-//   FormLabel,
-//   FormMessage,
-// } from '@/components/ui/form';
 
-import {
-  FieldGroup,
-  Field,
-  FieldLabel,
-  FieldError,
-} from '@/components/ui/field';
+import { Field, FieldLabel, FieldError } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import happyHuman from '@/assets/register-image.svg';
 
 const registerSchema = z
   .object({
-    name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
+    name: z
+      .string()
+      .min(2, { error: 'El nombre debe tener al menos 2 caracteres' }),
     email: z
       .string()
       .min(1, 'El correo electrónico es obligatorio')
@@ -46,8 +37,6 @@ export function RegisterPage() {
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
 
-    mode: 'onChange',
-
     defaultValues: {
       name: '',
       email: '',
@@ -58,19 +47,7 @@ export function RegisterPage() {
 
   const onSubmit: SubmitHandler<RegisterFormData> = (data) => {
     // TODO: Implementar lógica de registro
-
-    // try {
-    //   // Simular llamada a API
-
-    //   console.log('User registered:', data);
-    //   // Aquí podrías redirigir al usuario o mostrar un mensaje de éxito
-    // } catch (error) {
-    //   console.log('estoy aquí');
-    //   console.error('Registration error:', error);
-    //   // Aquí podrías mostrar un mensaje de error al usuario
-    // }
-
-    console.log('User registered:', data);
+    console.log('Datos del formulario:', data);
   };
 
   return (
@@ -129,118 +106,120 @@ export function RegisterPage() {
           </div>
 
           {/* Formulario */}
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <FieldGroup>
-              {/* Campo Nombre */}
-              <Controller
-                name="name"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="register-name">
-                      Nombre Completo
-                    </FieldLabel>
-                    <Input
-                      {...field}
-                      id="register-name"
-                      aria-invalid={fieldState.invalid}
-                      data-invalid={fieldState.invalid}
-                      placeholder="Tu nombre completo"
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-
-              {/* Campo Email */}
-              <Controller
-                name="email"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="register-email">
-                      Correo Electrónico
-                    </FieldLabel>
-                    <Input
-                      {...field}
-                      id="register-email"
-                      type="email"
-                      aria-invalid={fieldState.invalid}
-                      data-invalid={fieldState.invalid}
-                      placeholder="usuario@empresa.com"
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-
-              {/* Campo Password */}
-              <Controller
-                name="password"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="register-password">
-                      Contraseña
-                    </FieldLabel>
-                    <Input
-                      {...field}
-                      id="register-password"
-                      type="password"
-                      aria-invalid={fieldState.invalid}
-                      data-invalid={fieldState.invalid}
-                      placeholder="••••••••••"
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-
-              {/* Campo Confirmar Password */}
-              <Controller
-                name="confirmPassword"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="register-confirm">
-                      Confirmar Contraseña
-                    </FieldLabel>
-                    <Input
-                      {...field}
-                      id="register-confirm"
-                      type="password"
-                      aria-invalid={fieldState.invalid}
-                      data-invalid={fieldState.invalid}
-                      placeholder="••••••••••"
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-
-              {/* Botón Registrarse */}
-              <div className="pt-2">
-                <Button
-                  type="submit"
-                  className="w-full rounded-md shadow-lg shadow-blue-600/20"
-                  disabled={form.formState.isSubmitting}
-                >
-                  {form.formState.isSubmitting ? (
-                    <>Creando cuenta...</>
-                  ) : (
-                    'Registrarse'
+          <form
+            onSubmit={form.handleSubmit(onSubmit, (errors) => {
+              console.log('Errores del formulario:', errors);
+            })}
+          >
+            {/* Campo Nombre */}
+            <Controller
+              name="name"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="register-name">
+                    Nombre Completo
+                  </FieldLabel>
+                  <Input
+                    {...field}
+                    id="register-name"
+                    aria-invalid={fieldState.invalid}
+                    data-invalid={fieldState.invalid}
+                    placeholder="Tu nombre completo"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
                   )}
-                </Button>
-              </div>
-            </FieldGroup>
+                </Field>
+              )}
+            />
+
+            {/* Campo Email */}
+            <Controller
+              name="email"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="register-email">
+                    Correo Electrónico
+                  </FieldLabel>
+                  <Input
+                    {...field}
+                    id="register-email"
+                    type="email"
+                    aria-invalid={fieldState.invalid}
+                    data-invalid={fieldState.invalid}
+                    placeholder="usuario@empresa.com"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+
+            {/* Campo Password */}
+            <Controller
+              name="password"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="register-password">
+                    Contraseña
+                  </FieldLabel>
+                  <Input
+                    {...field}
+                    id="register-password"
+                    type="password"
+                    aria-invalid={fieldState.invalid}
+                    data-invalid={fieldState.invalid}
+                    placeholder="••••••••••"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+
+            {/* Campo Confirmar Password */}
+            <Controller
+              name="confirmPassword"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="register-confirm">
+                    Confirmar Contraseña
+                  </FieldLabel>
+                  <Input
+                    {...field}
+                    id="register-confirm"
+                    type="password"
+                    aria-invalid={fieldState.invalid}
+                    data-invalid={fieldState.invalid}
+                    placeholder="••••••••••"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+
+            {/* Botón Registrarse */}
+            <div className="pt-2">
+              <Button
+                type="submit"
+                className="w-full rounded-md shadow-lg shadow-blue-600/20"
+                disabled={form.formState.isSubmitting}
+              >
+                {form.formState.isSubmitting ? (
+                  <>Creando cuenta...</>
+                ) : (
+                  'Registrarse'
+                )}
+              </Button>
+            </div>
           </form>
 
           {/* Link a Login */}
