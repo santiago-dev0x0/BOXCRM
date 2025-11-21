@@ -1,40 +1,76 @@
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
+import type { SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link } from 'react-router';
 import { MessageSquareDot, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+// import {
+//   Form,
+//   FormControl,
+//   FormField,
+//   FormItem,
+//   FormLabel,
+//   FormMessage,
+// } from '@/components/ui/form';
+
+import {
+  FieldGroup,
+  Field,
+  FieldLabel,
+  FieldError,
+} from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
 import happyHuman from '@/assets/register-image.svg';
 
 const registerSchema = z
   .object({
-    name: z.string().min(2, 'El nombre debe tener al menos 2 caßracteres'),
-    email: z.string().email('Email inválido'),
+    name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
+    email: z
+      .string()
+      .min(1, 'El correo electrónico es obligatorio')
+      .email('Email inválido'),
     password: z
       .string()
       .min(6, 'La contraseña debe tener al menos 6 caracteres'),
-    confirmPassword: z.string(),
+    confirmPassword: z.string().min(1, 'Debes confirmar tu contraseña'),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: 'Las contraseñas no coinciden',
+    error: 'Las contraseñas no coinciden',
     path: ['confirmPassword'],
   });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
 export function RegisterPage() {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<RegisterFormData>({
+  const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
+
+    mode: 'onChange',
+
+    defaultValues: {
+      name: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    },
   });
 
-  const onSubmit = async (data: RegisterFormData) => {
+  const onSubmit: SubmitHandler<RegisterFormData> = (data) => {
     // TODO: Implementar lógica de registro
-    console.log('Register data:', data);
+
+    // try {
+    //   // Simular llamada a API
+
+    //   console.log('User registered:', data);
+    //   // Aquí podrías redirigir al usuario o mostrar un mensaje de éxito
+    // } catch (error) {
+    //   console.log('estoy aquí');
+    //   console.error('Registration error:', error);
+    //   // Aquí podrías mostrar un mensaje de error al usuario
+    // }
+
+    console.log('User registered:', data);
   };
 
   return (
@@ -75,7 +111,7 @@ export function RegisterPage() {
         {/* Tarjeta blanca con formulario */}
         <div className="relative z-20 w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
           {/* Logo BoxCRM */}
-          <div className="mb-6 flex items-center gap-2">
+          <div className="mb-6 flex items-center justify-center gap-2">
             <MessageSquareDot className="text-primary h-10 w-10" />
             <h1 className="text-2xl font-extrabold">
               Box<span className="text-primary">CRM</span>
@@ -93,131 +129,118 @@ export function RegisterPage() {
           </div>
 
           {/* Formulario */}
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            {/* Campo Nombre Completo */}
-            <div className="space-y-2">
-              <label
-                htmlFor="name"
-                className="text-foreground text-sm font-medium"
-              >
-                Nombre Completo
-              </label>
-              <input
-                id="name"
-                type="text"
-                placeholder="nombre completo"
-                className={cn(
-                  'border-input flex h-10 w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-sm transition-colors',
-                  'placeholder:text-muted-foreground',
-                  'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
-                  'disabled:cursor-not-allowed disabled:opacity-50',
-                  errors.name &&
-                    'border-destructive focus-visible:ring-destructive'
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <FieldGroup>
+              {/* Campo Nombre */}
+              <Controller
+                name="name"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="register-name">
+                      Nombre Completo
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      id="register-name"
+                      aria-invalid={fieldState.invalid}
+                      data-invalid={fieldState.invalid}
+                      placeholder="Tu nombre completo"
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                 )}
-                {...register('name')}
               />
-              {errors.name && (
-                <p className="text-destructive text-sm">
-                  {errors.name.message}
-                </p>
-              )}
-            </div>
 
-            {/* Campo Correo Electrónico */}
-            <div className="space-y-2">
-              <label
-                htmlFor="email"
-                className="text-foreground text-sm font-medium"
-              >
-                Correo Electrónico
-              </label>
-              <input
-                id="email"
-                type="email"
-                placeholder="example@gmail.com"
-                className={cn(
-                  'border-input flex h-10 w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-sm transition-colors',
-                  'placeholder:text-muted-foreground',
-                  'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
-                  'disabled:cursor-not-allowed disabled:opacity-50',
-                  errors.email &&
-                    'border-destructive focus-visible:ring-destructive'
+              {/* Campo Email */}
+              <Controller
+                name="email"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="register-email">
+                      Correo Electrónico
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      id="register-email"
+                      type="email"
+                      aria-invalid={fieldState.invalid}
+                      data-invalid={fieldState.invalid}
+                      placeholder="usuario@empresa.com"
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                 )}
-                {...register('email')}
               />
-              {errors.email && (
-                <p className="text-destructive text-sm">
-                  {errors.email.message}
-                </p>
-              )}
-            </div>
 
-            {/* Campo Contraseña */}
-            <div className="space-y-2">
-              <label
-                htmlFor="password"
-                className="text-foreground text-sm font-medium"
-              >
-                Contraseña
-              </label>
-              <input
-                id="password"
-                type="password"
-                placeholder="**********"
-                className={cn(
-                  'border-input flex h-10 w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-sm transition-colors',
-                  'placeholder:text-muted-foreground',
-                  'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
-                  'disabled:cursor-not-allowed disabled:opacity-50',
-                  errors.password &&
-                    'border-destructive focus-visible:ring-destructive'
+              {/* Campo Password */}
+              <Controller
+                name="password"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="register-password">
+                      Contraseña
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      id="register-password"
+                      type="password"
+                      aria-invalid={fieldState.invalid}
+                      data-invalid={fieldState.invalid}
+                      placeholder="••••••••••"
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                 )}
-                {...register('password')}
               />
-              {errors.password && (
-                <p className="text-destructive text-sm">
-                  {errors.password.message}
-                </p>
-              )}
-            </div>
 
-            {/* Campo Confirmar Contraseña */}
-            <div className="space-y-2">
-              <label
-                htmlFor="confirmPassword"
-                className="text-foreground text-sm font-medium"
-              >
-                Confirmar Contraseña
-              </label>
-              <input
-                id="confirmPassword"
-                type="password"
-                placeholder="**********"
-                className={cn(
-                  'border-input flex h-10 w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-sm transition-colors',
-                  'placeholder:text-muted-foreground',
-                  'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
-                  'disabled:cursor-not-allowed disabled:opacity-50',
-                  errors.confirmPassword &&
-                    'border-destructive focus-visible:ring-destructive'
+              {/* Campo Confirmar Password */}
+              <Controller
+                name="confirmPassword"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="register-confirm">
+                      Confirmar Contraseña
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      id="register-confirm"
+                      type="password"
+                      aria-invalid={fieldState.invalid}
+                      data-invalid={fieldState.invalid}
+                      placeholder="••••••••••"
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                 )}
-                {...register('confirmPassword')}
               />
-              {errors.confirmPassword && (
-                <p className="text-destructive text-sm">
-                  {errors.confirmPassword.message}
-                </p>
-              )}
-            </div>
 
-            {/* Botón Registrarse */}
-            <Button
-              type="submit"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 w-full rounded-md"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Creando cuenta...' : 'Registrarse'}
-            </Button>
+              {/* Botón Registrarse */}
+              <div className="pt-2">
+                <Button
+                  type="submit"
+                  className="w-full rounded-md shadow-lg shadow-blue-600/20"
+                  disabled={form.formState.isSubmitting}
+                >
+                  {form.formState.isSubmitting ? (
+                    <>Creando cuenta...</>
+                  ) : (
+                    'Registrarse'
+                  )}
+                </Button>
+              </div>
+            </FieldGroup>
           </form>
 
           {/* Link a Login */}
