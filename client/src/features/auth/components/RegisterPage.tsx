@@ -106,11 +106,7 @@ export function RegisterPage() {
           </div>
 
           {/* Formulario */}
-          <form
-            onSubmit={form.handleSubmit(onSubmit, (errors) => {
-              console.log('Errores del formulario:', errors);
-            })}
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)}>
             {/* Campo Nombre */}
             <Controller
               name="name"
