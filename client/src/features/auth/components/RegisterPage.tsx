@@ -4,13 +4,16 @@ import { useForm, Controller } from 'react-hook-form';
 import type { SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { MessageSquareDot, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 import { Field, FieldLabel, FieldError } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import happyHuman from '@/assets/register-image.svg';
+import { useState } from 'react';
+
+const BASE_URL = 'http://127.0.0.1:8000';
 
 const registerSchema = z
   .object({
@@ -33,7 +36,19 @@ const registerSchema = z
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
+interface RegisterResponse {
+  user: {
+    id: number;
+    username: string;
+    email: string;
+  };
+  token: string;
+}
+
 export function RegisterPage() {
+  const navigate = useNavigate();
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
 
@@ -45,9 +60,53 @@ export function RegisterPage() {
     },
   });
 
-  const onSubmit: SubmitHandler<RegisterFormData> = (data) => {
-    // TODO: Implementar lógica de registro
-    console.log('Datos del formulario:', data);
+  // const onSubmit: SubmitHandler<RegisterFormData> = (data) => {
+  //   // TODO: Implementar lógica de registro
+  //   console.log('Datos del formulario:', data);
+  // };
+
+  const onSubmit: SubmitHandler<RegisterFormData> = async (data) => {
+    setSubmitError(null);
+    try {
+      const response = await fetch(`${BASE_URL}/auth/register/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: data.name, // ⚠️ Tu esquema de Zod usa "name", pero el backend espera "username"
+          email: data.email,
+          password: data.password,
+        }),
+      });
+
+      const responseData: RegisterResponse | { error?: string } =
+        await response.json();
+
+      if (!response.ok) {
+        // Manejo de errores del backend (por ejemplo, email duplicado)
+        const backendError = (responseData as { error?: string }).error;
+        setSubmitError(
+          backendError ||
+            'Error al crear la cuenta. Por favor, inténtalo de nuevo.'
+        );
+        return;
+      }
+
+      // Éxito: guardar token y redirigir
+      const { token, user } = responseData as RegisterResponse;
+      localStorage.setItem('authToken', token);
+      localStorage.setItem('user', JSON.stringify(user));
+
+      // Opcional: actualizar contexto global de autenticación aquí
+
+      navigate('/dashboard'); // o la ruta que desees tras registrarse
+    } catch (err) {
+      console.error('Error de red:', err);
+      setSubmitError(
+        'No se pudo conectar con el servidor. Verifica tu conexión.'
+      );
+    }
   };
 
   return (
@@ -204,6 +263,11 @@ export function RegisterPage() {
 
             {/* Botón Registrarse */}
             <div className="pt-2">
+              {submitError && (
+                <div className="mb-4 text-center text-sm text-red-500">
+                  {submitError}
+                </div>
+              )}
               <Button
                 type="submit"
                 className="w-full rounded-md shadow-lg shadow-blue-600/20"
