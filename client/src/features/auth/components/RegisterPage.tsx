@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import happyHuman from '@/assets/register-image.svg';
 import { useState } from 'react';
 
+//TODO cambiar a variable de entorno
 const BASE_URL = 'http://127.0.0.1:8000';
 
 const registerSchema = z
@@ -100,7 +101,7 @@ export function RegisterPage() {
 
       // Opcional: actualizar contexto global de autenticación aquí
 
-      navigate('/dashboard'); // o la ruta que desees tras registrarse
+      navigate('/'); // o la ruta que desees tras registrarse
     } catch (err) {
       console.error('Error de red:', err);
       setSubmitError(
