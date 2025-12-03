@@ -220,6 +220,8 @@ import { Input } from '@/components/ui/input';
 import { useState } from 'react';
 import happyHuman from '@/assets/login-image.svg';
 
+import { useAuthStore } from '@/store/authStore';
+
 //TODO cambiar a variable de entorno
 const BASE_URL = 'http://127.0.0.1:8000';
 
@@ -254,6 +256,46 @@ export function LoginPage() {
     },
   });
 
+  // const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
+  //   setSubmitError(null);
+  //   try {
+  //     const response = await fetch(`${BASE_URL}/auth/login/`, {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({
+  //         username: data.username, // ✅ ahora coincide 1:1 con el backend
+  //         password: data.password,
+  //       }),
+  //     });
+
+  //     const responseData: LoginResponse | { error?: string; message?: string } =
+  //       await response.json();
+
+  //     if (!response.ok) {
+  //       const errorMsg =
+  //         (responseData as { message?: string }).message ||
+  //         (responseData as { error?: string }).error ||
+  //         'Usuario o contraseña incorrectos.';
+  //       setSubmitError(errorMsg);
+  //       return;
+  //     }
+
+  //     // Guardar en localStorage
+  //     const { token, user } = responseData as LoginResponse;
+  //     localStorage.setItem('authToken', token);
+  //     localStorage.setItem('user', JSON.stringify(user));
+
+  //     navigate('/'); // o tu ruta protegida
+  //   } catch (err) {
+  //     console.error('Error de red:', err);
+  //     setSubmitError(
+  //       'No se pudo conectar con el servidor. Verifica tu conexión.'
+  //     );
+  //   }
+  // };
+
   const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
     setSubmitError(null);
     try {
@@ -263,7 +305,7 @@ export function LoginPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          username: data.username, // ✅ ahora coincide 1:1 con el backend
+          username: data.username,
           password: data.password,
         }),
       });
@@ -280,12 +322,13 @@ export function LoginPage() {
         return;
       }
 
-      // Guardar en localStorage
       const { token, user } = responseData as LoginResponse;
-      localStorage.setItem('authToken', token);
-      localStorage.setItem('user', JSON.stringify(user));
 
-      navigate('/'); // o tu ruta protegida
+      // ✅ Guardar en el store de Zustand (persistirá automáticamente)
+      const { login } = useAuthStore.getState();
+      login(user, token);
+
+      navigate('/dashboard'); // o tu ruta protegida
     } catch (err) {
       console.error('Error de red:', err);
       setSubmitError(

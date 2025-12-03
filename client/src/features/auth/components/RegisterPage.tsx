@@ -12,6 +12,7 @@ import { Field, FieldLabel, FieldError } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import happyHuman from '@/assets/register-image.svg';
 import { useState } from 'react';
+import { useAuthStore } from '@/store/authStore';
 
 //TODO cambiar a variable de entorno
 const BASE_URL = 'http://127.0.0.1:8000';
@@ -66,6 +67,50 @@ export function RegisterPage() {
   //   console.log('Datos del formulario:', data);
   // };
 
+  // const onSubmit: SubmitHandler<RegisterFormData> = async (data) => {
+  //   setSubmitError(null);
+  //   try {
+  //     const response = await fetch(`${BASE_URL}/auth/register/`, {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({
+  //         username: data.name, // ⚠️ Tu esquema de Zod usa "name", pero el backend espera "username"
+  //         email: data.email,
+  //         password: data.password,
+  //       }),
+  //     });
+
+  //     const responseData: RegisterResponse | { error?: string } =
+  //       await response.json();
+
+  //     if (!response.ok) {
+  //       // Manejo de errores del backend (por ejemplo, email duplicado)
+  //       const backendError = (responseData as { error?: string }).error;
+  //       setSubmitError(
+  //         backendError ||
+  //           'Error al crear la cuenta. Por favor, inténtalo de nuevo.'
+  //       );
+  //       return;
+  //     }
+
+  //     // Éxito: guardar token y redirigir
+  //     const { token, user } = responseData as RegisterResponse;
+  //     localStorage.setItem('authToken', token);
+  //     localStorage.setItem('user', JSON.stringify(user));
+
+  //     // Opcional: actualizar contexto global de autenticación aquí
+
+  //     navigate('/'); // o la ruta que desees tras registrarse
+  //   } catch (err) {
+  //     console.error('Error de red:', err);
+  //     setSubmitError(
+  //       'No se pudo conectar con el servidor. Verifica tu conexión.'
+  //     );
+  //   }
+  // };
+
   const onSubmit: SubmitHandler<RegisterFormData> = async (data) => {
     setSubmitError(null);
     try {
@@ -75,7 +120,7 @@ export function RegisterPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          username: data.name, // ⚠️ Tu esquema de Zod usa "name", pero el backend espera "username"
+          username: data.name, // ⚠️ Asumiendo que "name" se mapea a "username"
           email: data.email,
           password: data.password,
         }),
@@ -85,7 +130,6 @@ export function RegisterPage() {
         await response.json();
 
       if (!response.ok) {
-        // Manejo de errores del backend (por ejemplo, email duplicado)
         const backendError = (responseData as { error?: string }).error;
         setSubmitError(
           backendError ||
@@ -94,14 +138,14 @@ export function RegisterPage() {
         return;
       }
 
-      // Éxito: guardar token y redirigir
+      // ✅ Éxito: guardar sesión usando Zustand
       const { token, user } = responseData as RegisterResponse;
-      localStorage.setItem('authToken', token);
-      localStorage.setItem('user', JSON.stringify(user));
 
-      // Opcional: actualizar contexto global de autenticación aquí
+      // Usa getState() porque estás dentro de una función async (no en el cuerpo del componente)
+      const { login } = useAuthStore.getState();
+      login(user, token);
 
-      navigate('/'); // o la ruta que desees tras registrarse
+      navigate('/dashboard'); // o tu ruta protegida
     } catch (err) {
       console.error('Error de red:', err);
       setSubmitError(
